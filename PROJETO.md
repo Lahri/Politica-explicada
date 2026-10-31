@@ -1,8 +1,8 @@
 # Política Explicada: onde estamos
 
 > Resumo do projeto em 31/10/2026, para continuar pelo computador.
-> Repositório: https://github.com/Lahri/politica-explicada
-> Site (depois de ativar o Pages): https://lahri.github.io/politica-explicada/
+> Repositório: https://github.com/Lahri/Politica-explicada
+> Site (depois de ativar o Pages): https://lahri.github.io/Politica-explicada/
 
 ---
 
@@ -59,9 +59,9 @@ Detalhes de uso e da chave do Google: veja o [README](README.md).
 ## 4. Checklist para continuar no PC
 
 ### ☐ A. Ativar o site (GitHub Pages)
-1. Abra https://github.com/Lahri/politica-explicada/settings/pages
+1. Abra https://github.com/Lahri/Politica-explicada/settings/pages
 2. **Source:** Deploy from a branch → **Branch:** `main` / `(root)` → **Save**
-3. Em 1 a 2 minutos, o site abre em https://lahri.github.io/politica-explicada/
+3. Em 1 a 2 minutos, o site abre em https://lahri.github.io/Politica-explicada/
 
 ### ☐ B. Criar a chave do Google (vozes)
 > ⚠️ **Não use o assistente** ("Tipo de credencial / Qual API você usa?"). Ele leva à conta de serviço, que não serve aqui.
