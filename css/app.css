@@ -170,3 +170,13 @@ summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; al
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* Quem fala + configurações das vozes */
+.segmentado.quem { flex-wrap: wrap; }
+.segmentado.quem button { min-height: 40px; padding: 4px 10px; font-size: .95rem; }
+.fala { margin: 6px 0 0; }
+.fala summary { min-height: 36px; font-weight: 400; color: var(--suave); }
+.config-voz { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--borda); }
+.config-voz img { border-radius: 50%; flex: none; }
+.config-voz > div { flex: 1; display: grid; gap: 6px; }
+.config-voz input[type=range] { flex: 1; }

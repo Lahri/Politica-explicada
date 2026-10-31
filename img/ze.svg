@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="400" height="400">
+  <title>Zé da Pauta</title>
+  <circle cx="100" cy="100" r="100" fill="#DBEAFE"/>
+  <clipPath id="c"><circle cx="100" cy="100" r="100"/></clipPath>
+  <g clip-path="url(#c)">
+    <!-- jaqueta de entregador -->
+    <path d="M28 200 Q32 150 100 144 Q168 150 172 200 Z" fill="#15803D"/>
+    <path d="M92 146 L100 200 L108 146 Z" fill="#FDE68A"/>
+    <!-- pescoço -->
+    <path d="M86 126 h28 v24 q-14 8 -28 0 Z" fill="#5C3A21"/>
+    <!-- rosto -->
+    <ellipse cx="100" cy="96" rx="38" ry="42" fill="#6B4423"/>
+    <!-- orelhas -->
+    <ellipse cx="62" cy="100" rx="6" ry="9" fill="#6B4423"/><ellipse cx="138" cy="100" rx="6" ry="9" fill="#6B4423"/>
+    <!-- barba curta -->
+    <path d="M66 108 Q70 140 100 142 Q130 140 134 108 Q126 128 100 130 Q74 128 66 108 Z" fill="#2B1A0E"/>
+    <!-- boné -->
+    <path d="M60 80 Q62 42 100 40 Q138 42 140 80 Z" fill="#EA580C"/>
+    <path d="M96 78 Q140 70 166 84 Q140 90 100 86 Z" fill="#C2410C"/>
+    <circle cx="100" cy="42" r="4" fill="#C2410C"/>
+    <!-- olhos e sobrancelhas -->
+    <circle cx="85" cy="97" r="4.5" fill="#1B1B1F"/><circle cx="115" cy="97" r="4.5" fill="#1B1B1F"/>
+    <path d="M76 88 q9 -5 18 0 M106 88 q9 -5 18 0" fill="none" stroke="#1B1B1F" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- sorriso -->
+    <path d="M86 114 Q100 126 114 114" fill="#FFFFFF" stroke="#1B1B1F" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+</svg>

@@ -94,6 +94,79 @@ async function testarVideo(browser, { forcarWebm }) {
   await ctx.close();
 }
 
+function wavBase64(segundos) {
+  const taxa = 24000;
+  const n = Math.round(taxa * segundos);
+  const b = Buffer.alloc(44 + n * 2);
+  b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVE', 8); b.write('fmt ', 12);
+  b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22); b.writeUInt32LE(taxa, 24);
+  b.writeUInt32LE(taxa * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(n * 2, 40);
+  for (let i = 0; i < n; i++) b.writeInt16LE(Math.round(Math.sin((2 * Math.PI * 220 * i) / taxa) * 6000), 44 + i * 2);
+  return b.toString('base64');
+}
+
+// Vozes de IA com o Google simulado (a rede de testes não acessa o Google).
+async function testarVozes(browser) {
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 2 });
+  await ctx.addInitScript(() => localStorage.setItem('pe:config', JSON.stringify({ googleKey: 'CHAVE-DE-TESTE' })));
+  const pedidos = [];
+  await ctx.route('https://texttospeech.googleapis.com/**', async (route) => {
+    const req = route.request();
+    if (req.url().includes('/voices')) {
+      return route.fulfill({ json: { voices: [
+        { name: 'pt-BR-Neural2-B', languageCodes: ['pt-BR'], ssmlGender: 'MALE' },
+        { name: 'pt-BR-Neural2-C', languageCodes: ['pt-BR'], ssmlGender: 'FEMALE' },
+      ] } });
+    }
+    const corpo = JSON.parse(req.postData());
+    pedidos.push({ ...corpo, chave: new URL(req.url()).searchParams.get('key') });
+    // Duração simulada: proporcional ao tamanho do texto.
+    route.fulfill({ json: { audioContent: wavBase64(0.5 + corpo.input.text.length * 0.02) } });
+  });
+  const page = await ctx.newPage();
+  const erros = [];
+  page.on('pageerror', (e) => erros.push(e.message));
+  page.on('dialog', (d) => d.accept());
+  await page.goto(URL_APP);
+  await page.waitForFunction(() => window.__fabrica?.estado);
+  await page.waitForFunction(() => document.querySelector('#status-config').textContent.includes('funcionando'));
+  ok(true, 'configurações: a chave é testada e as vozes em português são listadas');
+
+  await abrirExemplo(page, 'exemplo-verdade');
+  await page.click('#btn-vozes');
+  await page.waitForFunction(() => document.querySelector('#status-audio').textContent.includes('Vozes prontas'));
+  ok(pedidos.length === 5 && pedidos.every((p) => p.chave === 'CHAVE-DE-TESTE'), `uma chamada ao Google por fala (${pedidos.length})`);
+  ok(pedidos[0].voice.name === 'pt-BR-Neural2-B' && pedidos[1].voice.name === 'pt-BR-Neural2-C', 'Zé e Dona Cida usam vozes diferentes');
+  ok(pedidos[1].input.text.startsWith('Calma, meu bem'), 'a "fala diferente do texto" é a que vira voz');
+  ok(pedidos.every((p) => !/\p{Extended_Pictographic}|\*\*/u.test(p.input.text)), 'sem emojis nem asteriscos no texto falado');
+  const { tempos, duracao } = await page.evaluate(() => ({ tempos: window.__fabrica.estado.tempos, duracao: window.__fabrica.audio.buffer.duration }));
+  const esperados = pedidos.map((p) => Math.round((0.5 + p.input.text.length * 0.02 + 0.35) * 100) / 100);
+  ok(tempos.every((t, i) => Math.abs(t - esperados[i]) < 0.02), `tempo de cada tela = duração da fala (${tempos.join(', ')})`);
+  ok(Math.abs(duracao - tempos.reduce((a, b) => a + b, 0)) < 0.05, 'áudio junto tem a soma das falas');
+  const legenda = await page.textContent('#previa-legenda');
+  ok(legenda.includes('vozes são geradas por inteligência artificial'), 'legenda avisa das vozes de IA');
+  await page.fill('#inp-legenda', '');
+  ok((await page.textContent('#previa-legenda')).includes('Zé: '), 'legenda automática diz quem fala');
+
+  await page.click('#btn-status');
+  await page.waitForSelector('#resultado img[alt="Card de status"]');
+  await salvarBlobDoElemento(page, '#resultado img', path.join(SAIDA, 'vozes-status-ze.png'));
+
+  // Mudar um texto e gerar o vídeo: só a fala alterada é gerada de novo.
+  await page.fill('.tela-texto >> nth=4', 'Dica: vídeo **sem data**? Desconfie.');
+  await page.click('#btn-video');
+  await page.waitForSelector('#resultado video', { timeout: 60000 });
+  ok(pedidos.length === 6, `texto alterado: só 1 fala nova foi gerada (total ${pedidos.length})`);
+  const arq = path.join(SAIDA, 'video-vozes.' + (await page.$eval('#resultado video', (v) => v.dataset.formato)));
+  await salvarBlobDoElemento(page, '#resultado video', arq);
+  const info = ffprobe(arq);
+  const soma = await page.evaluate(() => window.__fabrica.estado.tempos.reduce((a, b) => a + b, 0));
+  ok(info.temAudio && Math.abs(info.duracao - soma) <= 0.6, `vídeo com vozes dura a soma das falas (${info.duracao.toFixed(2)} s ≈ ${soma.toFixed(2)} s)`);
+  execFileSync('ffmpeg', ['-y', '-v', 'error', '-ss', '1', '-i', arq, '-frames:v', '1', path.join(SAIDA, 'video-vozes-quadro.png')]);
+  ok(erros.length === 0, `sem erros no console (vozes)${erros.length ? ': ' + erros.join(' | ') : ''}`);
+  await ctx.close();
+}
+
 (async () => {
   const servidor = spawn('python3', ['-m', 'http.server', String(PORTA), '--bind', '127.0.0.1'], { cwd: RAIZ, stdio: 'ignore' });
   await new Promise((r) => setTimeout(r, 800));
@@ -188,6 +261,7 @@ async function testarVideo(browser, { forcarWebm }) {
     // ---------- vídeo ----------
     await testarVideo(browser, { forcarWebm: false });
     await testarVideo(browser, { forcarWebm: true });
+    await testarVozes(browser);
   } catch (e) {
     console.error(e);
     falhas++;

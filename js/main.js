@@ -4,6 +4,9 @@ import { desenharTela, carregarFontes, canvasParaBlob, textoLimpo } from './rend
 import { decodificarAudio, podeGravar, Gravador } from './audio.js';
 import { gerarVideo, formatoDeVideo } from './video.js';
 import { listarRascunhos, salvarRascunho, apagarRascunho, exportarRascunhos, importarRascunhos, novoId } from './rascunhos.js';
+import { PERSONAGENS, AVISO_IA, AVISO_IA_LEGENDA, carregarPersonagens } from './personagens.js';
+import { lerConfig, salvarConfig } from './config.js';
+import { gerarFalas, textoParaFala, listarVozes, sintetizar } from './voz.js';
 
 const $ = (sel) => document.querySelector(sel);
 const el = (tag, props = {}, ...filhos) => {
@@ -23,27 +26,48 @@ let gravador = null;
 
 function rascunhoVazio(quadroId = QUADROS[0].id) {
   const q = quadroPorId(quadroId);
-  return { id: novoId(), quadro: q.id, titulo: '', telas: [...q.telas], legenda: '', fontes: [{ nome: '', url: '' }], hashtags: MARCA.hashtags, tempos: [] };
+  return { id: novoId(), quadro: q.id, titulo: '', telas: [...q.telas], quem: [], falas: [], legenda: '', fontes: [{ nome: '', url: '' }], hashtags: MARCA.hashtags, tempos: [] };
 }
 
 function abrir(rascunho, { copia = false } = {}) {
   estado = structuredClone(rascunho);
   if (copia) estado.id = novoId();
   estado.fontes ??= [];
-  estado.tempos = ajustarTempos(estado.tempos, estado.telas.length);
+  sincronizar();
   telaAtual = 0;
+  audio = null;
+  $('#player-audio').hidden = true;
   renderTudo();
 }
 
-function ajustarTempos(tempos = [], n) {
-  const t = tempos.slice(0, n);
-  while (t.length < n) t.push(4);
-  return t;
+// Listas que andam junto com as telas (uma posição por tela).
+const PARALELAS = { tempos: 4, quem: '', falas: '' };
+
+function sincronizar() {
+  const n = estado.telas.length;
+  for (const [campo, padrao] of Object.entries(PARALELAS)) {
+    const lista = (estado[campo] || []).slice(0, n);
+    while (lista.length < n) lista.push(padrao);
+    estado[campo] = lista;
+  }
 }
+
+function moverTela(de, para) {
+  for (const campo of ['telas', ...Object.keys(PARALELAS)]) {
+    const [item] = estado[campo].splice(de, 1);
+    estado[campo].splice(para, 0, item);
+  }
+}
+
+function apagarTela(i) {
+  for (const campo of ['telas', ...Object.keys(PARALELAS)]) estado[campo].splice(i, 1);
+}
+
+const usaPersonagens = () => estado.quem.some(Boolean);
 
 let timerSalvar;
 function alterou({ telas = false } = {}) {
-  estado.tempos = ajustarTempos(estado.tempos, estado.telas.length);
+  sincronizar();
   if (telas) renderTelas();
   renderTempos();
   renderPrevia();
@@ -144,25 +168,49 @@ function renderTelas() {
         return b;
       };
       const mover = (d) => () => {
-        const [t] = estado.telas.splice(i, 1);
-        estado.telas.splice(i + d, 0, t);
-        const [s] = estado.tempos.splice(i, 1);
-        estado.tempos.splice(i + d, 0, s);
+        moverTela(i, i + d);
         telaAtual = i + d;
         alterou({ telas: true });
       };
+
+      // Quem fala nesta tela
+      const opcoesQuem = [['', 'Ninguém'], ...Object.values(PERSONAGENS).map((p) => [p.id, `${p.emoji} ${p.nome}`])];
+      const grupo = el('div', { className: 'segmentado quem' });
+      grupo.setAttribute('role', 'group');
+      grupo.setAttribute('aria-label', `Quem fala na tela ${i + 1}`);
+      for (const [id, rotulo] of opcoesQuem) {
+        const b = el('button', { type: 'button', textContent: rotulo });
+        b.setAttribute('aria-pressed', String(estado.quem[i] === id));
+        b.onclick = () => {
+          estado.quem[i] = id;
+          telaAtual = i;
+          alterou({ telas: true });
+        };
+        grupo.append(b);
+      }
+      const fala = el('textarea', { rows: 2, value: estado.falas[i], placeholder: 'Se deixar vazio, a personagem lê o texto da tela.' });
+      fala.setAttribute('aria-label', `Fala da personagem na tela ${i + 1}`);
+      fala.oninput = () => {
+        estado.falas[i] = fala.value;
+        crescer(fala);
+        alterou();
+      };
+      const blocoFala = el('details', { className: 'fala', open: !!estado.falas[i] }, el('summary', { textContent: '🗣️ Fala diferente do texto (opcional)' }), fala);
+      blocoFala.hidden = !estado.quem[i];
+
       return el(
         'li',
         { className: i === telaAtual ? 'atual' : '' },
+        el('div', { className: 'linha' }, el('span', { className: 'rotulo-inline', textContent: 'Quem fala:' }), grupo),
         area,
+        blocoFala,
         el(
           'div',
           { className: 'acoes' },
           mini('↑', 'Subir', mover(-1), i === 0),
           mini('↓', 'Descer', mover(1), i === estado.telas.length - 1),
           mini('✕', 'Apagar', () => {
-            estado.telas.splice(i, 1);
-            estado.tempos.splice(i, 1);
+            apagarTela(i);
             telaAtual = Math.min(telaAtual, estado.telas.length - 1);
             alterou({ telas: true });
           }, estado.telas.length === 1),
@@ -227,6 +275,7 @@ function renderPrevia() {
     indice: telaAtual,
     total: estado.telas.length,
     formato: formatoPrevia,
+    personagem: estado.quem[telaAtual],
   });
   $('#prev-num').textContent = `${telaAtual + 1} de ${estado.telas.length}`;
   $('#aviso-corte').hidden = !cortado;
@@ -242,9 +291,12 @@ function renderAvisos() {
 }
 
 function montarLegenda() {
-  const corpo = estado.legenda.trim() || estado.telas.map(textoLimpo).join('\n\n');
+  const corpo =
+    estado.legenda.trim() ||
+    estado.telas.map((t, i) => (estado.quem[i] ? `${PERSONAGENS[estado.quem[i]].nome}: ` : '') + textoLimpo(t)).join('\n\n');
   const fontes = estado.fontes.filter((f) => f.nome.trim() || f.url).map((f) => `• ${f.nome.trim()}${f.url ? (f.nome.trim() ? ': ' : '') + f.url : ''}`);
-  return [corpo, fontes.length ? 'Fontes:\n' + fontes.join('\n') : '', estado.hashtags.trim()].filter(Boolean).join('\n\n');
+  const aviso = usaPersonagens() ? (audio?.ia ? AVISO_IA_LEGENDA : 'Dona Cida e Zé são personagens fictícios.') : '';
+  return [corpo, fontes.length ? 'Fontes:\n' + fontes.join('\n') : '', aviso, estado.hashtags.trim()].filter(Boolean).join('\n\n');
 }
 
 function renderLegenda() {
@@ -255,7 +307,7 @@ function renderLegenda() {
 
 const slug = () =>
   (nomeRascunho(estado) || 'conteudo')
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'conteudo';
 
 function conferirAntes() {
@@ -309,7 +361,7 @@ async function gerarImagens(formato, indices) {
   const arquivos = [];
   for (const i of indices) {
     const c = document.createElement('canvas');
-    desenharTela(c, { quadro: q, texto: estado.telas[i], indice: i, total: estado.telas.length, formato });
+    desenharTela(c, { quadro: q, texto: estado.telas[i], indice: i, total: estado.telas.length, formato, personagem: estado.quem[i] });
     const blob = await canvasParaBlob(c);
     const sufixo = indices.length > 1 ? `-${i + 1}` : '';
     arquivos.push(new File([blob], `${slug()}-${formato}${sufixo}.png`, { type: 'image/png' }));
@@ -337,7 +389,11 @@ async function aoGerarStatus() {
 let gerandoVideo = false;
 async function aoGerarVideo() {
   if (gerandoVideo || !conferirAntes()) return;
-  if (!audio && !confirm('Você ainda não gravou o áudio. Gerar o vídeo sem som?')) return;
+  // Mudou o texto depois de gerar as vozes? Gera de novo (falas iguais vêm do cache, sem custo).
+  if (audio?.ia && audio.assinatura !== assinaturaFalas()) {
+    if (!(await aoGerarVozes())) return;
+  }
+  if (!audio && !confirm('Ainda não tem áudio (vozes ou gravação). Gerar o vídeo sem som?')) return;
   gerandoVideo = true;
   const botao = $('#btn-video');
   botao.disabled = true;
@@ -349,8 +405,10 @@ async function aoGerarVideo() {
     const { blob, mime, duracao } = await gerarVideo({
       quadro: quadroPorId(estado.quadro),
       telas: estado.telas,
+      quem: estado.quem,
       tempos: estado.tempos,
       audio: audio?.buffer,
+      selo: audio?.ia ? AVISO_IA : usaPersonagens() ? 'personagens fictícios' : '',
       aoProgredir: (f) => (barra.value = f),
     });
     const ext = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
@@ -380,6 +438,118 @@ async function aoCopiarLegenda() {
   }
 }
 
+// ---------- vozes de IA ----------
+
+let config = lerConfig();
+
+function falasParaGerar() {
+  return estado.telas.map((t, i) => {
+    const quem = estado.quem[i];
+    if (!quem) return null;
+    const texto = textoParaFala(estado.falas[i]?.trim() || t);
+    return texto ? { texto, voz: config.vozes[quem] } : null;
+  });
+}
+
+const assinaturaFalas = () => JSON.stringify(falasParaGerar());
+
+async function aoGerarVozes() {
+  if (!usaPersonagens()) {
+    $('#status-audio').textContent = 'Escolha quem fala (Dona Cida ou Zé) em pelo menos uma tela, no passo 2.';
+    return false;
+  }
+  if (!config.googleKey) {
+    $('#config').open = true;
+    $('#config').scrollIntoView({ behavior: 'smooth' });
+    $('#status-config').textContent = 'Cole aqui a sua chave do Google para gerar as vozes.';
+    return false;
+  }
+  const botao = $('#btn-vozes');
+  botao.disabled = true;
+  try {
+    const falas = falasParaGerar();
+    const { buffer, blob, tempos } = await gerarFalas({
+      falas,
+      chave: config.googleKey,
+      aoProgredir: (i, n) => ($('#status-audio').textContent = i < n ? `🔊 Gerando a voz da tela ${i + 1} de ${n}…` : 'Juntando as falas…'),
+    });
+    audio = { blob, buffer, ia: true, assinatura: JSON.stringify(falas) };
+    estado.tempos = tempos;
+    const player = $('#player-audio');
+    player.src = URL.createObjectURL(blob);
+    player.hidden = false;
+    renderTempos();
+    renderLegenda();
+    salvarDepois();
+    $('#status-audio').textContent = `Vozes prontas ✓ (${buffer.duration.toFixed(1)} s). Ouça para conferir. Os tempos das telas já foram ajustados.`;
+    return true;
+  } catch (e) {
+    $('#status-audio').textContent = '❌ Não consegui gerar as vozes: ' + e.message;
+    return false;
+  } finally {
+    botao.disabled = false;
+  }
+}
+
+function renderConfig() {
+  $('#inp-chave').value = config.googleKey;
+  $('#config-vozes').replaceChildren(
+    ...Object.values(PERSONAGENS).map((p) => {
+      const voz = config.vozes[p.id];
+      const sel = el('select', { id: `voz-${p.id}` }, el('option', { value: voz.name, textContent: voz.name }));
+      sel.onchange = () => { voz.name = sel.value; salvarConfig(config); };
+      const vel = el('input', { type: 'range', min: 0.7, max: 1.3, step: 0.05, value: voz.speakingRate });
+      const velTxt = el('span', { textContent: `${voz.speakingRate}×` });
+      vel.oninput = () => { voz.speakingRate = Number(vel.value); velTxt.textContent = `${vel.value}×`; salvarConfig(config); };
+      vel.setAttribute('aria-label', `Velocidade da voz de ${p.nome}`);
+      sel.setAttribute('aria-label', `Voz de ${p.nome}`);
+      const ouvir = el('button', { type: 'button', className: 'botao secundario', textContent: '▶️ Ouvir' });
+      ouvir.onclick = () => ouvirAmostra(p);
+      return el(
+        'div',
+        { className: 'config-voz' },
+        el('img', { src: p.imagem, alt: '', width: 64, height: 64 }),
+        el('div', {}, el('strong', { textContent: p.nome }), sel, el('div', { className: 'linha' }, el('span', { className: 'rotulo-inline', textContent: 'Velocidade' }), vel, velTxt), ouvir),
+      );
+    }),
+  );
+}
+
+async function carregarVozes() {
+  if (!config.googleKey) return;
+  try {
+    const vozes = await listarVozes(config.googleKey);
+    for (const p of Object.values(PERSONAGENS)) {
+      const atual = config.vozes[p.id].name;
+      const sel = $(`#voz-${p.id}`);
+      sel.replaceChildren(...vozes.map((v) => el('option', { value: v.name, textContent: `${v.name.replace('pt-BR-', '')} (${v.genero})`, selected: v.name === atual })));
+      if (!vozes.some((v) => v.name === atual)) sel.prepend(el('option', { value: atual, textContent: `${atual} (indisponível)`, selected: true }));
+    }
+    $('#status-config').textContent = `Chave funcionando ✓ ${vozes.length} vozes em português disponíveis.`;
+  } catch (e) {
+    $('#status-config').textContent = '❌ ' + e.message;
+  }
+}
+
+async function ouvirAmostra(p) {
+  if (!config.googleKey) {
+    $('#status-config').textContent = 'Cole a chave primeiro.';
+    return;
+  }
+  const frase = p.id === 'cida' ? 'Oi, meu bem! Eu sou a Dona Cida. Vem que eu te explico.' : 'E aí! Eu sou o Zé. Bora entender o que tá rolando?';
+  try {
+    const buffer = await sintetizar(frase, config.vozes[p.id], config.googleKey);
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const src = ac.createBufferSource();
+    src.buffer = buffer;
+    src.connect(ac.destination);
+    src.onended = () => ac.close();
+    src.start();
+  } catch (e) {
+    $('#status-config').textContent = '❌ ' + e.message;
+  }
+}
+
 // ---------- áudio ----------
 
 async function usarAudio(blob, origem) {
@@ -389,6 +559,7 @@ async function usarAudio(blob, origem) {
     const player = $('#player-audio');
     player.src = URL.createObjectURL(blob);
     player.hidden = false;
+    renderLegenda();
     $('#status-audio').textContent = `Áudio ${origem} ✓ (${buffer.duration.toFixed(1)} s). Ouça para conferir.`;
     dividirIgualmente();
   } catch {
@@ -487,6 +658,14 @@ function ligarEventos() {
   }
   $('#arq-audio').onchange = (e) => e.target.files[0] && usarAudio(e.target.files[0], 'carregado');
   $('#btn-dividir').onclick = dividirIgualmente;
+  $('#btn-vozes').onclick = aoGerarVozes;
+
+  $('#btn-salvar-chave').onclick = () => {
+    config.googleKey = $('#inp-chave').value.trim();
+    salvarConfig(config);
+    $('#status-config').textContent = config.googleKey ? 'Chave guardada neste aparelho. Testando…' : 'Chave apagada deste aparelho.';
+    carregarVozes();
+  };
 
   $('#btn-carrossel').onclick = aoGerarCarrossel;
   $('#btn-status').onclick = aoGerarStatus;
@@ -507,7 +686,9 @@ async function iniciar() {
   } catch {
     exemplos = [];
   }
-  await carregarFontes();
+  await Promise.all([carregarFontes(), carregarPersonagens()]);
+  renderConfig();
+  carregarVozes();
   const salvos = listarRascunhos();
   if (salvos.length) abrir(salvos[0]);
   else if (exemplos.length) abrir(exemplos[0], { copia: true });
@@ -521,6 +702,7 @@ async function iniciar() {
 // Usado pelos testes automáticos.
 window.__fabrica = {
   get estado() { return estado; },
+  get audio() { return audio; },
   usarAudio,
 };
 

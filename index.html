@@ -82,19 +82,37 @@
   </section>
 
   <section class="cartao" aria-labelledby="t-audio">
-    <h2 id="t-audio"><span class="num">3</span> Grave o áudio <small>(opcional, para o vídeo)</small></h2>
-    <div class="linha">
-      <button type="button" id="btn-gravar" class="botao">🎙️ Gravar</button>
-      <label class="botao secundario" for="arq-audio">📎 Usar áudio salvo</label>
-      <input type="file" id="arq-audio" accept="audio/*" hidden>
-    </div>
-    <p class="ajuda" id="status-audio" aria-live="polite">Leia as telas em voz alta, com calma. Dica: grave num lugar silencioso.</p>
+    <h2 id="t-audio"><span class="num">3</span> Áudio <small>(para o vídeo)</small></h2>
+    <button type="button" id="btn-vozes" class="botao grande">🔊 Gerar vozes da Dona Cida e do Zé</button>
+    <p class="ajuda">Cada tela com "quem fala" ganha a voz da personagem, e o vídeo se ajusta sozinho.</p>
+    <details>
+      <summary>Ou use a sua própria voz</summary>
+      <div class="linha">
+        <button type="button" id="btn-gravar" class="botao secundario">🎙️ Gravar</button>
+        <label class="botao secundario" for="arq-audio">📎 Usar áudio salvo</label>
+        <input type="file" id="arq-audio" accept="audio/*" hidden>
+      </div>
+      <p class="ajuda">Leia as telas em voz alta, com calma, num lugar silencioso.</p>
+    </details>
+    <p class="ajuda" id="status-audio" aria-live="polite"></p>
     <audio id="player-audio" controls hidden></audio>
 
     <h3>Tempo de cada tela no vídeo (segundos)</h3>
     <ol id="tempos" class="tempos"></ol>
     <button type="button" id="btn-dividir" class="botao secundario">Dividir o áudio igualmente</button>
     <p class="ajuda" id="tempo-total"></p>
+
+    <details id="config">
+      <summary>⚙️ Configurações das vozes</summary>
+      <p class="ajuda">As vozes são geradas pelo Google Cloud (Text-to-Speech). Cole aqui a sua chave de API. Ela fica guardada <b>só neste aparelho</b>. Veja o passo a passo no README do projeto.</p>
+      <label for="inp-chave">Chave de API do Google</label>
+      <div class="linha">
+        <input id="inp-chave" type="password" autocomplete="off" spellcheck="false" placeholder="AIza…" style="flex:1">
+        <button type="button" id="btn-salvar-chave" class="botao">Guardar</button>
+      </div>
+      <p class="ajuda" id="status-config" aria-live="polite"></p>
+      <div id="config-vozes"></div>
+    </details>
   </section>
 
   <section class="cartao" aria-labelledby="t-gerar">
@@ -120,7 +138,7 @@
 </main>
 
 <footer class="rodape">
-  Funciona sem cadastro e sem internet depois da primeira visita. Nada sai do seu aparelho.
+  Funciona sem cadastro. Rascunhos e chave ficam só no seu aparelho. Dona Cida e Zé são personagens fictícios.
 </footer>
 
 <script type="module" src="js/main.js"></script>

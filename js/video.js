@@ -19,17 +19,17 @@ export function formatoDeVideo() {
 const FADE = 0.35; // segundos de transição entre telas
 
 /**
- * @param {{quadro, telas: string[], tempos: number[], audio?: AudioBuffer, aoProgredir?: (f: number) => void}} opcoes
+ * @param {{quadro, telas: string[], quem?: string[], tempos: number[], audio?: AudioBuffer, selo?: string, aoProgredir?: (f: number) => void}} opcoes
  * @returns {Promise<{blob: Blob, mime: string, duracao: number}>}
  */
-export async function gerarVideo({ quadro, telas, tempos, audio, aoProgredir = () => {} }) {
+export async function gerarVideo({ quadro, telas, quem = [], tempos, audio, selo, aoProgredir = () => {} }) {
   const mime = formatoDeVideo();
   if (!mime) throw new Error('Este navegador não consegue gravar vídeo. Tente pelo Chrome ou Safari atualizados.');
 
   const { w, h } = FORMATOS.status;
   const quadros = telas.map((texto, indice) => {
     const c = document.createElement('canvas');
-    desenharTela(c, { quadro, texto, indice, total: telas.length, formato: 'status' });
+    desenharTela(c, { quadro, texto, indice, total: telas.length, formato: 'status', personagem: quem[indice], selo });
     return c;
   });
 

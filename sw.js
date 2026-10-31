@@ -1,6 +1,6 @@
 // Guarda os arquivos do app para funcionar sem internet.
 // Troque a VERSAO sempre que publicar mudanças, para os celulares baixarem a versão nova.
-const VERSAO = 'fabrica-v1';
+const VERSAO = 'fabrica-v2';
 const ARQUIVOS = [
   './',
   'index.html',
@@ -12,12 +12,17 @@ const ARQUIVOS = [
   'js/audio.js',
   'js/video.js',
   'js/rascunhos.js',
+  'js/personagens.js',
+  'js/config.js',
+  'js/voz.js',
   'data/exemplos.json',
   'fonts/AtkinsonHyperlegible-400.woff2',
   'fonts/AtkinsonHyperlegible-700.woff2',
   'manifest.webmanifest',
   'img/icon-192.png',
   'img/icon-512.png',
+  'img/cida.svg',
+  'img/ze.svg',
 ];
 
 self.addEventListener('install', (e) => {

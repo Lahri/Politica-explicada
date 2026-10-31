@@ -1,6 +1,7 @@
 // Desenha uma tela (card) no canvas. Texto entre **asteriscos** sai em negrito
 // e na cor do quadro. Quebras de linha do texto são respeitadas.
 import { MARCA } from './marca.js';
+import { PERSONAGENS, imagemDe } from './personagens.js';
 
 export const FORMATOS = {
   carrossel: { w: 1080, h: 1350 },
@@ -79,10 +80,10 @@ function ajustar(ctx, texto, caixa, tamanhoMax) {
 /**
  * Desenha uma tela.
  * @param {HTMLCanvasElement} canvas
- * @param {{quadro, texto, indice, total, formato: 'carrossel'|'status'}} opcoes
+ * @param {{quadro, texto, indice, total, formato: 'carrossel'|'status', personagem?: string, selo?: string}} opcoes
  * @returns {{cortado: boolean}} cortado = texto não coube nem no menor tamanho
  */
-export function desenharTela(canvas, { quadro, texto, indice, total, formato }) {
+export function desenharTela(canvas, { quadro, texto, indice, total, formato, personagem, selo }) {
   const { w, h } = FORMATOS[formato];
   canvas.width = w;
   canvas.height = h;
@@ -102,9 +103,23 @@ export function desenharTela(canvas, { quadro, texto, indice, total, formato }) 
   ctx.textAlign = 'left';
   ctx.fillText(`${quadro.emoji}  ${quadro.nome}`, 80, faixa / 2 + 4, w - 160);
 
+  // Quem fala: ilustração e nome da personagem logo abaixo da faixa
+  let topoTexto = faixa + 70;
+  const pers = personagem && PERSONAGENS[personagem];
+  if (pers) {
+    const lado = formato === 'status' ? 200 : 150;
+    const yP = faixa + (formato === 'status' ? 60 : 40);
+    const img = imagemDe(pers.id);
+    if (img) ctx.drawImage(img, 90, yP, lado, lado);
+    ctx.font = fonte(true, formato === 'status' ? 60 : 52);
+    ctx.fillStyle = pers.cor;
+    ctx.fillText(`${pers.nome}:`, 90 + lado + 30, yP + lado / 2);
+    topoTexto = yP + lado + 40;
+  }
+
   // Texto principal, centralizado na vertical
   const rodape = formato === 'status' ? 220 : 170;
-  const caixa = { x: 90, y: faixa + 70, w: w - 180, h: h - faixa - 70 - rodape };
+  const caixa = { x: 90, y: topoTexto, w: w - 180, h: h - topoTexto - rodape };
   const maximo = capa ? (formato === 'status' ? 112 : 100) : formato === 'status' ? 92 : 80;
   const { linhas, tamanho, altura, cortado } = ajustar(ctx, texto, caixa, maximo);
   const alturaLinha = tamanho * 1.28;
@@ -118,6 +133,14 @@ export function desenharTela(canvas, { quadro, texto, indice, total, formato }) 
       ctx.fillText(p.t, inicio + p.x, y);
     }
     y += alturaLinha;
+  }
+
+  // Selo de transparência (vídeos com vozes de IA)
+  if (selo) {
+    ctx.font = fonte(false, 34);
+    ctx.fillStyle = MARCA.textoSuave;
+    ctx.textAlign = 'center';
+    ctx.fillText(selo, w / 2, h - rodape + 20, w - 120);
   }
 
   // Rodapé: @ do projeto, numeração e dica de arrastar na capa do carrossel

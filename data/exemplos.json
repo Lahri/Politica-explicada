@@ -4,7 +4,7 @@
     "quadro": "traduzindo",
     "titulo": "Investigado, réu, condenado",
     "telas": [
-      "Investigado, réu, condenado… é tudo a mesma coisa? **Não!** 👇",
+      "Dona Cida, investigado, réu, condenado… é tudo **a mesma coisa**? 🤔",
       "🔎 **Investigado:** a polícia ou o Ministério Público está apurando se houve crime. Ainda **não tem acusação**.",
       "⚖️ **Réu:** o Ministério Público fez a acusação e a Justiça aceitou. Agora vai ter **julgamento**.",
       "🔒 **Condenado:** no fim do processo, o juiz decidiu que a pessoa é **culpada**. Muitas vezes ainda cabe recurso.",
@@ -13,17 +13,39 @@
     ],
     "legenda": "Investigado, réu e condenado são coisas diferentes. Antes de repassar uma notícia, repara qual palavra ela usa. 👀",
     "fontes": [
-      { "nome": "Estado de Minas: réu, indiciado, condenado, entenda a diferença", "url": "https://www.em.com.br/nacional/2026/08/7473664-reu-indiciado-condenado-entenda-a-diferenca-entre-os-termos.html" },
-      { "nome": "Folha Vitória: suspeito, indiciado, acusado, réu ou condenado", "url": "https://www.folhavitoria.com.br/policia/suspeito-indiciado-acusado-reu-ou-condenado-entenda-a-diferenca" }
+      {
+        "nome": "Estado de Minas: réu, indiciado, condenado, entenda a diferença",
+        "url": "https://www.em.com.br/nacional/2026/08/7473664-reu-indiciado-condenado-entenda-a-diferenca-entre-os-termos.html"
+      },
+      {
+        "nome": "Folha Vitória: suspeito, indiciado, acusado, réu ou condenado",
+        "url": "https://www.folhavitoria.com.br/policia/suspeito-indiciado-acusado-reu-ou-condenado-entenda-a-diferenca"
+      }
     ],
-    "hashtags": "#traduzindo #justiça #cidadania"
+    "hashtags": "#traduzindo #justiça #cidadania",
+    "quem": [
+      "ze",
+      "cida",
+      "cida",
+      "cida",
+      "cida",
+      "ze"
+    ],
+    "falas": [
+      "",
+      "Não, meu bem! Investigado é quando a polícia ou o Ministério Público está apurando se houve crime. Ainda não tem acusação.",
+      "",
+      "",
+      "",
+      "Entendi! Vou mandar pra quem vive confundindo."
+    ]
   },
   {
     "id": "exemplo-cobrar",
     "quadro": "cobrar",
     "titulo": "Prefeitura, Estado ou União?",
     "telas": [
-      "Reclamou com a pessoa certa? Muita gente cobra quem **não pode resolver** 👇",
+      "Dona Cida, a rua lá de casa tá cheia de buraco. **Eu reclamo com quem?** 🤔",
       "🕳️ Buraco em rua da cidade, posto de saúde, creche, ônibus da cidade → **Prefeitura**.\nQuem fiscaliza: **vereadores**.",
       "🚓 Polícia Militar, escola de ensino médio, rodovia estadual → **Governo do Estado**.\nQuem fiscaliza: **deputados estaduais**.",
       "🛣️ Rodovia federal (BR), universidade federal, INSS → **Governo Federal**.\nQuem fiscaliza: **deputados federais e senadores**.",
@@ -32,16 +54,35 @@
     ],
     "legenda": "Antes de reclamar, descobre quem pode resolver. Cobrar a pessoa certa faz toda a diferença. 💪",
     "fontes": [
-      { "nome": "Constituição Federal (arts. 30, 144 e 211)", "url": "https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm" }
+      {
+        "nome": "Constituição Federal (arts. 30, 144 e 211)",
+        "url": "https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm"
+      }
     ],
-    "hashtags": "#dequemcobrar #cidadania #prefeitura"
+    "hashtags": "#dequemcobrar #cidadania #prefeitura",
+    "quem": [
+      "ze",
+      "cida",
+      "cida",
+      "cida",
+      "cida",
+      "ze"
+    ],
+    "falas": [
+      "",
+      "Depende, meu bem! Buraco em rua da cidade, posto de saúde, creche e ônibus da cidade: é com a prefeitura. E quem fiscaliza são os vereadores.",
+      "",
+      "",
+      "",
+      "Cobrar a pessoa certa é resolver mais rápido! Salva e manda no grupo da família."
+    ]
   },
   {
     "id": "exemplo-verdade",
     "quadro": "verdade",
     "titulo": "Urna votando sozinha?",
     "telas": [
-      "\"Vídeo mostra urna votando sozinha no 2º turno!\" Será? 🤔",
+      "Dona Cida, tão dizendo que um vídeo mostra **urna votando sozinha** no 2º turno! 😱",
       "❌ **Falso.** O vídeo é de **2014**, em Torres (RS).",
       "A urna deu defeito naquela eleição e foi **trocada**. Não tem nada a ver com 2026.",
       "Quem checou: **Aos Fatos** e **Boatos.org**. Links na legenda.",
@@ -49,17 +90,37 @@
     ],
     "legenda": "Esse vídeo da \"urna votando sozinha\" é antigo e está circulando fora de contexto. Antes de repassar, checa! ✅",
     "fontes": [
-      { "nome": "Aos Fatos", "url": "https://www.aosfatos.org/noticias/video-nao-mostra-urna-registrando-votos-sozinha/" },
-      { "nome": "Boatos.org", "url": "https://boatos.org/brasil/video-mostra-urna-eletronica-votando-automaticamente-durante-duas-horas-nas-eleicoes-de-2026.html" }
+      {
+        "nome": "Aos Fatos",
+        "url": "https://www.aosfatos.org/noticias/video-nao-mostra-urna-registrando-votos-sozinha/"
+      },
+      {
+        "nome": "Boatos.org",
+        "url": "https://boatos.org/brasil/video-mostra-urna-eletronica-votando-automaticamente-durante-duas-horas-nas-eleicoes-de-2026.html"
+      }
     ],
-    "hashtags": "#éverdade #fakenews #eleições"
+    "hashtags": "#éverdade #fakenews #eleições",
+    "quem": [
+      "ze",
+      "cida",
+      "cida",
+      "cida",
+      "cida"
+    ],
+    "falas": [
+      "",
+      "Calma, meu bem. Isso é falso. O vídeo é de 2014, lá em Torres, no Rio Grande do Sul.",
+      "",
+      "Quem checou foram o Aos Fatos e o Boatos.org. Os links estão na legenda.",
+      ""
+    ]
   },
   {
     "id": "exemplo-agora",
     "quadro": "agora",
     "titulo": "Vote em projetos do Senado",
     "telas": [
-      "Sabia que dá pra opinar em projetos de lei **pelo celular**? Leva 2 minutos 📱",
+      "Dona Cida, dá pra opinar em projeto de lei **pelo celular**? 📱",
       "1️⃣ Entra no **e-Cidadania**, o site do Senado, e faz um cadastro rápido.",
       "2️⃣ Toca em **Consulta Pública** e procura um tema que te importa.",
       "3️⃣ Vota **SIM** ou **NÃO**. Atenção: só dá pra votar uma vez em cada projeto.",
@@ -68,10 +129,32 @@
     ],
     "legenda": "Política não é só no dia da eleição. Dá pra participar pelo celular, hoje mesmo. 🗳️",
     "fontes": [
-      { "nome": "e-Cidadania (Senado Federal)", "url": "https://www12.senado.leg.br/ecidadania" },
-      { "nome": "Agência Senado: cidadão pode opinar sobre qualquer projeto", "url": "https://www12.senado.leg.br/noticias/materias/2016/08/08/cidadao-pode-opinar-sobre-qualquer-projeto-no-senado" }
+      {
+        "nome": "e-Cidadania (Senado Federal)",
+        "url": "https://www12.senado.leg.br/ecidadania"
+      },
+      {
+        "nome": "Agência Senado: cidadão pode opinar sobre qualquer projeto",
+        "url": "https://www12.senado.leg.br/noticias/materias/2016/08/08/cidadao-pode-opinar-sobre-qualquer-projeto-no-senado"
+      }
     ],
-    "hashtags": "#façaagora #participação #senado"
+    "hashtags": "#façaagora #participação #senado",
+    "quem": [
+      "ze",
+      "cida",
+      "cida",
+      "cida",
+      "cida",
+      "ze"
+    ],
+    "falas": [
+      "",
+      "Dá sim, meu bem, e leva dois minutos! Primeiro, entra no e-Cidadania, o site do Senado, e faz um cadastro rápido.",
+      "Depois, toca em Consulta Pública e procura um tema que te importa.",
+      "Aí é só votar sim ou não. Mas atenção: só dá pra votar uma vez em cada projeto.",
+      "",
+      "Já votei! E você? Conta nos comentários em qual!"
+    ]
   },
   {
     "id": "exemplo-investigado",
@@ -86,8 +169,25 @@
     ],
     "legenda": "",
     "fontes": [
-      { "nome": "[Fonte oficial: PF, MPF, STF, tribunal…]", "url": "" }
+      {
+        "nome": "[Fonte oficial: PF, MPF, STF, tribunal…]",
+        "url": ""
+      }
     ],
-    "hashtags": "#transparência #cidadania"
+    "hashtags": "#transparência #cidadania",
+    "quem": [
+      "cida",
+      "cida",
+      "cida",
+      "cida",
+      "cida"
+    ],
+    "falas": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
   }
 ]
