@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fábrica de conteúdo · Política Explicada</title>
+<meta name="description" content="Crie carrosséis, cards de status e vídeos com a sua voz para explicar política de um jeito simples.">
+<meta name="theme-color" content="#1B1B1F">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="topo">
+  <h1><span id="marca-nome">Política Explicada</span> <small>Fábrica de conteúdo</small></h1>
+</header>
+
+<main>
+  <section class="cartao" aria-labelledby="t-abrir">
+    <h2 id="t-abrir">Começar</h2>
+    <div class="linha">
+      <button type="button" id="btn-novo" class="botao">➕ Novo conteúdo</button>
+      <label class="rotulo-inline" for="sel-abrir">ou abrir:</label>
+      <select id="sel-abrir"></select>
+    </div>
+    <p class="status-salvo" id="status-salvo" aria-live="polite"></p>
+    <details>
+      <summary>Backup dos rascunhos</summary>
+      <p class="ajuda">Os rascunhos ficam salvos só neste aparelho e navegador. O áudio não é salvo.</p>
+      <div class="linha">
+        <button type="button" id="btn-exportar" class="botao secundario">Baixar backup</button>
+        <label class="botao secundario" for="arq-importar">Restaurar backup</label>
+        <input type="file" id="arq-importar" accept="application/json,.json" hidden>
+        <button type="button" id="btn-apagar" class="botao perigo">Apagar este rascunho</button>
+      </div>
+    </details>
+  </section>
+
+  <section class="cartao" aria-labelledby="t-quadro">
+    <h2 id="t-quadro"><span class="num">1</span> Escolha o quadro</h2>
+    <div id="quadros" class="quadros" role="radiogroup" aria-labelledby="t-quadro"></div>
+    <p class="ajuda" id="dica-quadro"></p>
+  </section>
+
+  <section class="cartao" aria-labelledby="t-telas">
+    <h2 id="t-telas"><span class="num">2</span> Escreva as telas</h2>
+    <label for="inp-titulo">Título (só para você achar depois)</label>
+    <input id="inp-titulo" type="text" placeholder="Ex.: Investigado, réu, condenado">
+    <p class="ajuda">Uma ideia por tela, frases curtas. Coloque <b>**entre asteriscos**</b> o que quer destacar.</p>
+    <div class="previa">
+      <div class="linha">
+        <span class="rotulo-inline">Prévia:</span>
+        <div class="segmentado" role="group" aria-label="Formato da prévia">
+          <button type="button" data-formato="carrossel" aria-pressed="true">Instagram</button>
+          <button type="button" data-formato="status" aria-pressed="false">Status</button>
+        </div>
+      </div>
+      <canvas id="canvas-previa" aria-label="Prévia da tela"></canvas>
+      <div class="linha centro">
+        <button type="button" id="prev-ant" class="botao secundario" aria-label="Tela anterior">‹</button>
+        <span id="prev-num" aria-live="polite"></span>
+        <button type="button" id="prev-prox" class="botao secundario" aria-label="Próxima tela">›</button>
+      </div>
+      <p id="aviso-corte" class="aviso" hidden>⚠️ O texto desta tela está grande demais. Divida em duas telas.</p>
+      <p id="aviso-modelo" class="aviso" hidden>⚠️ Ainda tem campos [entre colchetes] para preencher.</p>
+    </div>
+
+    <ol id="telas" class="telas"></ol>
+    <button type="button" id="btn-add-tela" class="botao secundario">➕ Adicionar tela</button>
+
+    <h3>Fontes</h3>
+    <p class="ajuda">Todo conteúdo precisa de fonte. Prefira a fonte oficial (TSE, STF, PF, Senado, Câmara) ou a agência de checagem.</p>
+    <div id="fontes"></div>
+    <button type="button" id="btn-add-fonte" class="botao secundario">➕ Adicionar fonte</button>
+    <p id="aviso-fonte" class="aviso" hidden>⚠️ Coloque pelo menos uma fonte com link antes de publicar.</p>
+
+    <label for="inp-legenda">Texto da legenda</label>
+    <textarea id="inp-legenda" rows="3" placeholder="Se deixar vazio, a legenda usa o texto das telas."></textarea>
+    <label for="inp-hashtags">Hashtags</label>
+    <input id="inp-hashtags" type="text">
+  </section>
+
+  <section class="cartao" aria-labelledby="t-audio">
+    <h2 id="t-audio"><span class="num">3</span> Grave o áudio <small>(opcional, para o vídeo)</small></h2>
+    <div class="linha">
+      <button type="button" id="btn-gravar" class="botao">🎙️ Gravar</button>
+      <label class="botao secundario" for="arq-audio">📎 Usar áudio salvo</label>
+      <input type="file" id="arq-audio" accept="audio/*" hidden>
+    </div>
+    <p class="ajuda" id="status-audio" aria-live="polite">Leia as telas em voz alta, com calma. Dica: grave num lugar silencioso.</p>
+    <audio id="player-audio" controls hidden></audio>
+
+    <h3>Tempo de cada tela no vídeo (segundos)</h3>
+    <ol id="tempos" class="tempos"></ol>
+    <button type="button" id="btn-dividir" class="botao secundario">Dividir o áudio igualmente</button>
+    <p class="ajuda" id="tempo-total"></p>
+  </section>
+
+  <section class="cartao" aria-labelledby="t-gerar">
+    <h2 id="t-gerar"><span class="num">4</span> Gerar e compartilhar</h2>
+    <div class="botoes-gerar">
+      <button type="button" id="btn-carrossel" class="botao grande">🖼️ Carrossel do Instagram</button>
+      <div class="linha">
+        <button type="button" id="btn-status" class="botao grande">📱 Card de status</button>
+        <label class="rotulo-inline" for="sel-tela-status">tela:</label>
+        <select id="sel-tela-status"></select>
+      </div>
+      <button type="button" id="btn-video" class="botao grande">🎬 Vídeo (TikTok, Reels, status)</button>
+      <button type="button" id="btn-legenda" class="botao grande secundario">📋 Copiar legenda</button>
+    </div>
+    <progress id="progresso" max="1" value="0" hidden></progress>
+    <p id="status-gerar" class="ajuda" aria-live="polite"></p>
+    <div id="resultado"></div>
+    <details>
+      <summary>Ver legenda</summary>
+      <pre id="previa-legenda" class="legenda"></pre>
+    </details>
+  </section>
+</main>
+
+<footer class="rodape">
+  Funciona sem cadastro e sem internet depois da primeira visita. Nada sai do seu aparelho.
+</footer>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
